@@ -25,6 +25,7 @@ export const registerUser = asyncHandler(async (req, res) => {
   if (userAlreadyExist) {
     throw new ApiError(400, "user already exists");
   }
+
   let avatarUrl;
   if (req.file) {
     const localPath = req.file?.path;
