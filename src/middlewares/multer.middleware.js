@@ -6,7 +6,7 @@ const destinationDir =
   process.env.NODE_ENV === "development"
     ? resolve(__dirname, "../../../backend/public/temp")
     : "/public/temp";
-const storage = multer.diskStorage({
+const storage = multer.memoryStorage({
   destination: function (req, file, cb) {
     cb(null, `${destinationDir}`);
   },
