@@ -5,7 +5,7 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const destinationDir =
   process.env.NODE_ENV === "development"
     ? resolve(__dirname, "../../../backend/public/temp")
-    : "/temp/upload";
+    : "/public/temp";
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     cb(null, `${destinationDir}`);
