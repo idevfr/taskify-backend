@@ -3,6 +3,7 @@ import {
   getLoggedInUser,
   loginUser,
   logoutUser,
+  refreshAccessToken,
   registerUser,
   updateUserAvatar,
 } from "../controller/user.controller.js";
@@ -16,5 +17,6 @@ Router.route("/login").post(loginUser);
 Router.route("/logout").post(verifyJWT, logoutUser);
 Router.route("/update-avatar").post(verifyJWT, updateUserAvatar);
 Router.route("/loggedin-user").get(verifyJWT, getLoggedInUser);
+Router.route("/refresh-tokens").post(verifyJWT, refreshAccessToken);
 //
 export default Router;

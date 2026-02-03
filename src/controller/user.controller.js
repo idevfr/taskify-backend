@@ -4,6 +4,7 @@ import { ApiResponse } from "../helpers/apiResponse.js";
 import { User } from "../models/user.model.js";
 import { uploadToCloudinary } from "../utils/cloudinary.js";
 import { generateTokens } from "../helpers/generateTokens.js";
+import jwt from "jsonwebtoken";
 import {
   refrehCookieOptions,
   accessCookieOptions,
@@ -147,4 +148,21 @@ export const getLoggedInUser = asyncHandler(async (req, res) => {
         "currently logged in user fetched successfully",
       ),
     );
+});
+export const refreshAccessToken = asyncHandler(async (req, res) => {
+  const token = req.cookies.refreshToken;
+  if (!token) {
+    throw new ApiError(401, "user is not authenticated");
+  }
+  const decodedToken = jwt.verify(token, process.env.REFRESH_TOKEN_KEY);
+  if (!decodedToken) {
+    throw new ApiError(500, "failed decoding refresh token");
+  }
+  const { accessToken, refreshToken } = await generateTokens(decodedToken._id);
+  console.log(accessToken, refreshToken);
+  res
+    .status(200)
+    .cookie("accessToken", accessToken, accessCookieOptions)
+    .cookie("refreshToken", refreshToken, refrehCookieOptions)
+    .json(new ApiResponse(200, {}, "refreshing tokens was successful"));
 });

@@ -12,4 +12,6 @@ app.get("/", (req, res) => {
 });
 import userRouter from "./routes/user.routes.js";
 app.use("/api/v1/users", userRouter);
+import { erroHandler } from "./middlewares/errorHandler.middeware.js";
+app.use(erroHandler);
 export default app;

@@ -11,6 +11,7 @@ const uploadToCloudinary = async function (localPath) {
   try {
     const file = await cloudinary.uploader.upload(localPath, {
       resource_type: "image",
+      folder: "user-avatar",
     });
     if (!file) throw new Error("failed uploading avatar");
     fs.unlinkSync(localPath);
