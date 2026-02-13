@@ -6,7 +6,7 @@ import { uploadToCloudinary } from "../utils/cloudinary.js";
 import { generateTokens } from "../helpers/generateTokens.js";
 import jwt from "jsonwebtoken";
 import {
-  refrehCookieOptions,
+  refreshCookieOptions,
   accessCookieOptions,
 } from "../helpers/constants.js";
 export const registerUser = asyncHandler(async (req, res) => {
@@ -74,7 +74,7 @@ export const loginUser = asyncHandler(async (req, res) => {
   const { accessToken, refreshToken } = await generateTokens(user?._id);
   return res
     .cookie("accessToken", accessToken, accessCookieOptions)
-    .cookie("refreshToken", refreshToken, refrehCookieOptions)
+    .cookie("refreshToken", refreshToken, refreshCookieOptions)
     .status(200)
     .json(
       new ApiResponse(
@@ -158,11 +158,14 @@ export const refreshAccessToken = asyncHandler(async (req, res) => {
   if (!decodedToken) {
     throw new ApiError(500, "failed decoding refresh token");
   }
-  const { accessToken, refreshToken } = await generateTokens(decodedToken._id);
-  console.log(accessToken, refreshToken);
+  const user = await User.findById(decodedToken._id);
+  if (!user) {
+    throw new ApiError(404, "user not found");
+  }
+  const { accessToken, refreshToken } = await generateTokens(user._id);
   res
     .status(200)
     .cookie("accessToken", accessToken, accessCookieOptions)
-    .cookie("refreshToken", refreshToken, refrehCookieOptions)
+    .cookie("refreshToken", refreshToken, refreshCookieOptions)
     .json(new ApiResponse(200, {}, "refreshing tokens was successful"));
 });

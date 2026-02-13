@@ -17,6 +17,6 @@ Router.route("/login").post(loginUser);
 Router.route("/logout").post(verifyJWT, logoutUser);
 Router.route("/update-avatar").post(verifyJWT, updateUserAvatar);
 Router.route("/loggedin-user").get(verifyJWT, getLoggedInUser);
-Router.route("/refresh-tokens").post(verifyJWT, refreshAccessToken);
+Router.route("/refresh-tokens").post(refreshAccessToken);
 //
 export default Router;
