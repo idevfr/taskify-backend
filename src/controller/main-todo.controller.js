@@ -42,12 +42,18 @@ export const deleteMainTodo = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, {}, "todo deleted successfully"));
 });
 export const getTasks = asyncHandler(async (req, res) => {
+  const loggedInUser = req.user;
   const { id } = req.params;
   if (!id) {
     throw new ApiError(400, "todo id is required");
   }
   const [tasks] = await MainTodo.aggregate([
-    { $match: { _id: new mongoose.Types.ObjectId(id) } },
+    {
+      $match: {
+        _id: new mongoose.Types.ObjectId(id),
+        owner: new mongoose.Types.ObjectId(loggedInUser?._id),
+      },
+    },
     {
       $lookup: {
         from: "subtodos",
@@ -68,4 +74,17 @@ export const getTasks = asyncHandler(async (req, res) => {
   return res
     .status(200)
     .json(new ApiResponse(200, tasks, "fetched all the tasks successfully"));
+});
+export const getTodos = asyncHandler(async (req, res) => {
+  const loggedInUser = req.user;
+  if (!loggedInUser) {
+    throw new ApiError(401, "user is not authenticated");
+  }
+  const todos = await MainTodo.find({ owner: loggedInUser._id });
+  if (!todos.length) {
+    throw new ApiError(404, "no todo found!");
+  }
+  return res
+    .status(200)
+    .json(new ApiResponse(200, todos, "all todos fetched successfully"));
 });
