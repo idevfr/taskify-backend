@@ -12,6 +12,10 @@ app.get("/", (req, res) => {
 });
 import userRouter from "./routes/user.routes.js";
 app.use("/api/v1/users", userRouter);
+import mainTodoRouter from "./routes/main-todo.routes.js";
+app.use("/api/v1/todo", mainTodoRouter);
+import subTodoRouter from "./routes/sub-toodo.routes.js";
+app.use("/api/v1/todo/:id/sub", subTodoRouter);
 import { erroHandler } from "./middlewares/errorHandler.middeware.js";
 app.use(erroHandler);
 export default app;

@@ -1,4 +1,4 @@
-import { Schema, model } from "mongoose";
+import mongoose, { Schema, model } from "mongoose";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 const userSchema = new Schema(
@@ -14,6 +14,7 @@ const userSchema = new Schema(
     fullName: { type: String, required: true },
     avatar: { type: String, default: "", trim: true },
     refreshToken: { type: String, default: "" },
+    todoList: [{ type: mongoose.Types.ObjectId, ref: "MainTodo" }],
   },
   { timestamps: true },
 );
