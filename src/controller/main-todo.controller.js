@@ -3,21 +3,25 @@ import { ApiResponse } from "../helpers/apiResponse.js";
 import { ApiError } from "../helpers/apiError.js";
 import { MainTodo } from "../models/main-todo.model.js";
 import { User } from "../models/user.model.js";
-import mongoose, { Mongoose } from "mongoose";
+import mongoose from "mongoose";
 export const createMainTodo = asyncHandler(async (req, res) => {
   const loggedInUser = req.user;
   if (!loggedInUser) {
     throw new ApiError(401, "user is not authenticated");
   }
-  const { title } = req.body;
-  if (!title) {
-    throw new ApiError(400, "title is required");
+  const { title, date } = req.body;
+  if (!title && !date) {
+    throw new ApiError(400, "title and date is required");
   }
   const user = await User.findById(loggedInUser._id);
   if (!user) {
     throw new ApiError(404, "user not found");
   }
-  const mainTodoData = await MainTodo.create({ title: title, owner: user._id });
+  const mainTodoData = await MainTodo.create({
+    title: title,
+    date: date,
+    owner: user._id,
+  });
   if (!mainTodoData) {
     throw new ApiError(500, "failed creating todo :(");
   }
@@ -41,19 +45,13 @@ export const deleteMainTodo = asyncHandler(async (req, res) => {
     .status(200)
     .json(new ApiResponse(200, {}, "todo deleted successfully"));
 });
-export const getTasks = asyncHandler(async (req, res) => {
+export const getTodos = asyncHandler(async (req, res) => {
   const loggedInUser = req.user;
-  const { id } = req.params;
-  if (!id) {
-    throw new ApiError(400, "todo id is required");
+  if (!loggedInUser) {
+    throw new ApiError(401, "user is not authenticated");
   }
-  const [tasks] = await MainTodo.aggregate([
-    {
-      $match: {
-        _id: new mongoose.Types.ObjectId(id),
-        owner: new mongoose.Types.ObjectId(loggedInUser?._id),
-      },
-    },
+  const todos = await MainTodo.aggregate([
+    { $match: { owner: new mongoose.Types.ObjectId(loggedInUser._id) } },
     {
       $lookup: {
         from: "subtodos",
@@ -63,24 +61,25 @@ export const getTasks = asyncHandler(async (req, res) => {
       },
     },
     {
+      $addFields: {
+        taskSize: { $size: "$tasks" },
+        completedTask: {
+          $size: {
+            $filter: {
+              input: "$tasks",
+              as: "task",
+              cond: { $eq: ["$$task.isComplete", true] },
+            },
+          },
+        },
+      },
+    },
+    {
       $project: {
-        tasks: 1,
+        tasks: 0,
       },
     },
   ]);
-  if (!tasks) {
-    throw new ApiError(404, "task not found");
-  }
-  return res
-    .status(200)
-    .json(new ApiResponse(200, tasks, "fetched all the tasks successfully"));
-});
-export const getTodos = asyncHandler(async (req, res) => {
-  const loggedInUser = req.user;
-  if (!loggedInUser) {
-    throw new ApiError(401, "user is not authenticated");
-  }
-  const todos = await MainTodo.find({ owner: loggedInUser._id });
   if (!todos.length) {
     throw new ApiError(404, "no todo found!");
   }

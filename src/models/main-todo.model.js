@@ -7,12 +7,10 @@ const mainTodoSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    todos: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "SubTodo",
-      },
-    ],
+    date: {
+      type: Date,
+      required: true,
+    },
     owner: {
       type: mongoose.Types.ObjectId,
       ref: "User",
@@ -20,9 +18,7 @@ const mainTodoSchema = new mongoose.Schema(
   },
   { timestamps: true },
 );
-mainTodoSchema.pre("save", async function () {
-  await User.findByIdAndUpdate(this.owner, { $push: { todoList: this._id } });
-});
+
 mainTodoSchema.pre("findOneAndDelete", async function () {
   const todo = await this.model.findOne(this.getFilter());
   await User.findOneAndUpdate(todo.owner, { $pull: { todoList: todo._id } });
