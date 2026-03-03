@@ -105,8 +105,8 @@ export const logoutUser = asyncHandler(async (req, res) => {
     throw new ApiError(404, "user not found");
   }
   return res
-    .clearCookie("accessToken")
-    .clearCookie("refreshToken")
+    .clearCookie("accessToken", accessCookieOptions)
+    .clearCookie("refreshToken", refreshCookieOptions)
     .status(200)
     .json(new ApiResponse(200, {}, "logged out successfully"));
 });
